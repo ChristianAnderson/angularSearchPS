@@ -1,7 +1,9 @@
   
 <div  id="userDetails">
-    <p>First Name: {{user.login}}</p>
+    <p>First Name: {{ user.login }}</p>
     
+    {{ error }}
+
     <img ng-src="{{user.avatar_url}}" alt="{{user.name}}" width="80" />
 </div>
 
