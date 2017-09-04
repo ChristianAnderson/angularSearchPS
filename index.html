@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html ng-app="githubViewer">
+
+  <head>
+    <link rel="stylesheet" href="style.css">
+    
+  </head>
+
+  <body ng-controller="MainController">
+    <h2>{{message}}</h2>
+  
+    <div>
+      {{error}}
+    </div>
+    
+    {{countdown}}
+    
+    <form name="searchUser" ng-submit="search(username)">
+      <input type="search" placeholder="Username to find" ng-model="username" required ng-cloak/>
+      <input type="submit" name="" id="" value="Search" />
+    </form>
+    
+    <div ng-include="'includes/user-details.html'" ng-show="gotData"></div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.24/angular.min.js"></script>
+    <script src="controllers/script.js"></script>
+    <script src="services/github.js"></script>
+  </body>
+
+</html>

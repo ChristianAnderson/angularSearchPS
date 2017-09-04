@@ -1,0 +1,32 @@
+  
+<div  id="userDetails">
+    <p>First Name: {{user.login}}</p>
+    
+    <img ng-src="{{user.avatar_url}}" alt="{{user.name}}" width="80" />
+</div>
+
+Order: 
+
+<select ng-model="orderRepo">
+  <option value="+name">Name</option>
+  <option value="-stargazers_count">Stars</option>
+  <option value="+language">Language</option>
+</select>
+
+<table border="0">
+  <thead>
+    <tr>
+      <th ng-click = "updateOrderRepo('+name')">Name</th>
+      <th ng-click = "updateOrderRepo('-stargazers_count')">Stars</th>
+      <th ng-click = "updateOrderRepo('+language')">Language</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr ng-repeat="repo in repos | orderBy:orderRepo">
+      <td>{{repo.name}}</td>
+      <td>{{repo.stargazers_count | number}}</td>
+      <td>{{repo.language}}</td>
+    </tr>
+  </tbody>
+</table>
+ 
