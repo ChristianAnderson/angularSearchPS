@@ -9,14 +9,11 @@
       var onUserComplete = function(data){
         $scope.gotData = true;
         $scope.user = data;
-        //$http.get($scope.user.repos_url)
         github.getRepos($scope.user).then(onRepos, onError);
       };
       
       var onRepos = function(data){
         $scope.repos = data;
-        $location.hash("userDetails");
-        $anchorScroll();
       }
       
       var onError = function(reason){
@@ -27,9 +24,9 @@
         $scope.orderRepo = orderParameter;
       };
       
-      $scope.username = $routerParams.username;
+      $scope.username = $routeParams.username;
       $scope.orderRepo = "+name";
-      
+      github.getUser($scope.username).then(onUserComplete, onError);
       
     };
     

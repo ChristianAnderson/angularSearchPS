@@ -24,6 +24,7 @@
         $scope.countdown = null;
       }
       // RouteCode
+      $location.path("/user/" + username);
     }
     
     $scope.username = "angular";
