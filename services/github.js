@@ -15,10 +15,26 @@
                         return response.data;
                       });
       };
-      
+
+      var getRepoData = function(username, reponame){ // 3 
+        return  $http.get("https://api.github.com/repos/"+ username +"/" + reponame)  
+                     .then(function(response){
+                       return response.data; // regresa la data directamente asi que solo tienes que instanciarla
+                     });
+      };
+
+      var getContributors = function(contributors_url){
+        return $http.get(contributors_url)
+                    .then(function(response){
+                      return response.data;
+                    });
+      };
+
       return{
         getUser: getUser,
-        getRepos: getRepos
+        getRepos: getRepos,
+        getRepoData: getRepoData,
+        getContributors: getContributors
       };
       
     };

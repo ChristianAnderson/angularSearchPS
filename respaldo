@@ -1,0 +1,332 @@
+@using MyHerbalife3.Notifications.Web.Models.ViewModels.Notifications
+@using MyHerbalife3.Notifications.Web
+@using MyHerbalife3.Shared.Infrastructure.Interfaces
+@using MyHerbalife3.Shared.UI.Extensions
+@using MyHerbalife3.Shared.UI.Helpers
+@using MyHerbalife3.Shared.ViewModel.ValueObjects
+@model SubscriptionViewModel
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var context = (IGlobalContext)HttpContext.Current.ApplicationInstance;
+    var isBifurcationEnabled = context.CultureConfiguration.IsBifurcationEnabled;
+
+    var url = MyHerbalife3.Account.Common.SegmentationUrlResolver.GetSegmentationUrl("/notifications/subscriptions/notificationssubscriptions.aspx?IsUserRequested=yes", isBifurcationEnabled);
+    var urlContactInfo = MyHerbalife3.Account.Common.SegmentationUrlResolver.GetSegmentationUrl("/account/profile/MyContactInfo.aspx", isBifurcationEnabled);
+
+    var urlMarketingEmail = MyHerbalife3.Account.Common.SegmentationUrlResolver.GetSegmentationUrl("/Notifications/Subscriptions/MarketingEmails.aspx", isBifurcationEnabled);
+    var urlMarketingSms = MyHerbalife3.Account.Common.SegmentationUrlResolver.GetSegmentationUrl("/Notifications/Subscriptions/MarketingSMS.aspx", isBifurcationEnabled);
+    var browseScheme = context.CurrentExperience.BrowseScheme;
+
+}
+
+@section HeadScripts {
+
+    <script type="text/javascript">
+
+        var bScheme = '@Html.Raw(context.CurrentExperience.BrowseScheme.ToString())';
+
+        function exitFunction() {
+            return "Exit";
+        }
+
+        function unloadPage(response) {
+            if (response) 
+                $("body").attr("onbeforeunload", "return exitFunction()");
+            else 
+                $("body").removeAttr("onbeforeunload", "return exitFunction()");
+        }
+
+        // Tutorial Control JS
+        function tutorialModal() {
+            $('#modal-bg').addClass('modal-on');
+            $('#modal-bg-tutorial').addClass('modal-on');
+            $('#modal-tutorial').addClass('modal-on');
+        }
+
+        function goToT01() {
+            $('.tutorial-slide').slideUp();
+            $('#tutorial01').slideDown();
+        };
+
+        function goToT02() {
+            $('.tutorial-slide').slideUp();
+            $('#tutorial02').slideDown();
+        };
+
+        function goToT03() {
+            $('.tutorial-slide').slideUp();
+            $('#tutorial03').slideDown();
+        };
+
+        $('#modal-tutorial a.close-reveal-modal').click(function() {
+
+            $('#modal-bg-tutorial').removeClass('modal-on');
+            $('#modal-tutorial').removeClass('modal-on');
+            $('body').removeClass('stop-scroll');
+        });
+        // Ends Tutorial Control JS
+
+    </script>
+}
+
+<div id="subscriptionsPage" ng-app="subscriptions" ng-controller="SubscriptionsController">
+
+    <div id="subscriptions"  class="containerSubscribe">
+
+        @*Preferences*@
+        <div class="preferences">
+            <div class="divider-block">
+                <p class="right">
+                    <a id="Go_to_Advance_View" class="btn tracklink" href="@url">@this.Localize("GoToAdvanceView.txt")</a>
+                </p>
+                <p class="left pad">@this.Localize("YourNotificationsWillBeSentTo.txt") @Model.PrimaryEmail (<a id="Edit_Your_Email" class="tracklink" href="@urlContactInfo">@this.Localize("EditYourEmail.txt")</a>).</p>
+            </div>
+            <div class="divider-block">
+                <h5>@this.Localize("PreferredLanguage.txt")</h5>
+                
+                <select id="Preferred_Language" ng-model="localeValue" ng-options="option.Value as option.LocaleName for option in preferredLanguage" ng-change="modelChanger()" ng-click="onCheckClicked($event)"> </select>
+                
+                <input id="Preference" type="checkbox" name="Preference" class="tracklink" ng-model="preferences.acceptsDefault" ng-change="modelChanger()">
+                
+                <label class="pref" for="Preference">
+                    <span id="testHi" class="labelCustomCheckbox">
+                        @this.Localize("DefaultLanguage.txt")
+                    </span>
+                </label>
+            </div>
+        </div>
+
+        <div ng-click="subscriptionDone = false"  class="notification-success close vanish" ng-show="subscriptionDone" ng-cloak>
+            <i class="icon-chat-ln-2"></i>
+            <span ng-show="subscribeToAllDone">@this.Localize("SubscribeToAllDone.txt")</span>
+            <span  ng-show="saveChangesDone">@this.Localize("SaveDone.txt")</span>
+        </div>
+
+        <div ng-click="error = false" class="notification-error close vanish" ng-show="error" ng-cloak>
+            <i class="icon-alert-ln-1"></i>
+            <span>@this.Localize("Error.txt")</span>
+        </div>
+
+        @if (Model.HasSave)
+        {
+            <div class="divider-block">
+                <a id="Subscribe_to_All" class="btn-primary btn-large vanish left tracklink" ng-click="subscribeConfirmationModal = subscribedToAllClicked = true; subscriptionDone = false">@this.Localize("SubscribetoAll.txt")</a>
+                <a id="Save_Changes" class="btn btn-primary btn-large right vanish tracklink" style="margin-right:5px;" ng-click="subscribeConfirmationModal = saveChangesClicked = true; subscriptionDone = false " ng-disabled="!modelChanged" ng-cloak>@this.Localize("SaveChanges.txt")</a>
+            </div>
+        }
+        
+        <div class="category-cards">
+
+            <div class="card">
+                <a id="Marketing_Email" class="tracklink" href="@urlMarketingEmail">
+                    <div class="icon emails">
+                        <i class="icon-megaphone-ln-1"></i>
+                    </div>
+                    <h5>@this.Localize("MarketingAnnouncementsTitle.txt")</h5>
+                    <p class="short-desc">@this.Localize("MarketingAnnouncementsDescription.txt")</p>
+                </a>
+            </div>
+
+            @if (Model.IsSMSCountry && browseScheme == BrowseScheme.Ds)
+            {
+                <div id="Marketing_Sms" class="card tracklink">
+                    <a href="@urlMarketingSms">
+                        <div class="icon sms">
+                            <i class="icon-mobile-phone-ln-1"></i>
+                        </div>
+                        <h5>@this.Localize("MarketingSmsTitle.txt")</h5>
+                        <p class="short-desc">@this.Localize("MarketingSmsDescription.txt")</p>
+                    </a>
+                </div>
+            }
+        </div>
+        
+        <div class="category-cards">
+            <div style="" class="card spacer">
+            </div>
+        </div>
+        
+        @*Categories Cards*@
+        <div class="category-cards" ng-controller="CategoriesController as categoryCtrl" ng-cloak>
+            <div class="card" ng-repeat="card in category | orderBy: 'Name'">
+                <div class="icon" ng-style="setBackground(card.CategoryResources[0].Value)" ng-click="categoryDetails(card)">
+                    <i class="{{card.CategoryResources[1].Value}}"></i>
+                </div>
+                <h5>{{card.Name}}</h5>
+                <p class="short-desc">{{card.Description}}</p>
+                <div class="divider-block">
+
+                    <input id="{{'category_' + card.CategoryID}}"
+                           type="checkbox"
+                           ng-class="{'semi-checked': (card.checkStatus.isSemi == true)}"
+                           ng-model="card.checkStatus.result"
+                           ng-change="subscribeCategory(card.checkStatus, card.Alerts, card.Channels); modelChanger()"
+                           ng-click="onCheckClicked($event)">
+
+                    <label class="one" for="{{'category_' + card.CategoryID}}">
+                        <span class="labelCustomCheckbox" ng-hide="card.checkStatus.isSemi || !card.checkStatus.result" id="selectionCat">@this.Localize("Subscribed.txt")</span>
+                        <span class="labelCustomCheckbox" ng-hide="card.checkStatus.result" id="selectionCat">@this.Localize("Subscribe.txt")</span>
+                        <span class="labelCustomCheckbox" ng-hide="!card.checkStatus.isSemi" id="selectionCat">@this.Localize("SemiSubscribed1.txt") {{card.checkStatus.counteredSubscribedAlert}} @this.Localize("SemiSubscribed2.txt") {{card.checkStatus.totalAlerts}}</span>
+                    </label>
+                    <div id="modalIcon">
+                        <a class="info-link" ng-click="categoryDetails(card)"><i class="icon-setting-gear-ln-1"></i></a>
+                    </div>
+                </div>
+                <!-- MODAL CATEGORY DETAIL -->
+                <div id="modal-category-details-categoryID" class="reveal-modal modal-window" ng-class="{'modal-on vanish': (card.modalOn == true)}" style="opacity: 1; top: 60px; outline:none" tabindex="0" esc-action="escPressed(card)">
+                    <h4>{{card.Name}}  <span>({{card.checkStatus.counteredSubscribedAlert}} @this.Localize("Of.txt") {{card.checkStatus.totalAlerts}} @this.Localize("Notifications.txt"))</span></h4>
+                    <!-- /Notification messages -->
+                    <div id="account" class="cat-category">
+                        <div class="controls">
+                            <span>@this.Localize("DeliverTo.txt")</span>
+
+                            <input id="Deliver_to_MyHL_{{card.CategoryID}}"
+                                   type="checkbox" ng-model="card.Channels[0].IsSubscribed"
+                                   ng-change="channelsStatus(card.checkStatus, card.Alerts, card.Channels); modelChanger()"
+                                   ng-click="onCheckClicked($event)">
+                            <label for="Deliver_to_MyHL_{{card.CategoryID}}">
+                                {{card.Channels[0].Value}}
+                            </label>
+
+                            <input id="Deliver_to_Email_{{card.CategoryID}}"
+                                   type="checkbox"
+                                   ng-model="card.Channels[1].IsSubscribed"
+                                   ng-change="channelsStatus(card.checkStatus, card.Alerts, card.Channels); modelChanger()"
+                                   ng-click="onCheckClicked($event)">
+                            <label for="Deliver_to_Email_{{card.CategoryID}}">
+                                {{card.Channels[1].Value}}
+                            </label>
+
+                            <select id="Category_Frequency_{{card.CategoryID}}" ng-model="card.FrequencyID" ng-disabled="card.CategoryID == 2" ng-options="option.Id as option.Name for option in preferredFrequencyOptions(card.CategoryID)" ng-change="modelChanger()" ng-click="onCheckClicked($event)" class="inlineBlock"> </select>
+
+
+                        </div>
+                        <!-- Account Item content -->
+                        <div class="cat-item-content">
+                            <div class="divider-block options">
+                                <input id="Select_All_{{card.CategoryID}}"
+                                       type="checkbox"
+                                       ng-model="card.checkStatus.result"
+                                       ng-change="subscribeCategory(card.checkStatus, card.Alerts, card.Channels); modelChanger()"
+                                       ng-click="onCheckClicked($event)">
+                                <label for="Select_All_{{card.CategoryID}}">
+                                    <span ng-show="card.checkStatus.result" class="textPadding labelCustomCheckbox">@this.Localize("UnselectAll.txt")</span>
+                                    <span ng-hide="card.checkStatus.result" class="textPadding labelCustomCheckbox">@this.Localize("SelectAll.txt")</span>
+                                </label>
+                            </div>
+                            <ul id="alert-list"
+                                class="category-list"
+                                ng-show="card.modalOn">
+                                <li ng-repeat="notification in card.Alerts">
+                                    <input id="Select_Alert_{{notification.AlertID}}"
+                                           type="checkbox"
+                                           ng-model="notification.IsSubscribed"
+                                           ng-change="countAlerts(card.Alerts, card.checkStatus, card.Channels); modelChanger()"
+                                           ng-click="onCheckClicked($event)">
+                                    <label for="Select_Alert_{{notification.AlertID}}" class="labelAlert">
+                                        <span class="labelCustomCheckbox">
+                                            {{notification.Name}}
+                                        </span>
+                                    </label>
+                                    <i class="detail desc icon-question-mark-fl-1" ng-click="toolTip(notification)" class="tooltip tooltip-dark"></i>
+                                    <div class="description" ng-click="notification.TooltipOn = false" ng-class="{'vanish': card.modalOn}" ng-show="notification.TooltipOn && card.modalOn" ng-bind-html="notification.Tooltip"></div>
+                                </li>
+                            </ul>
+                        </div>
+                        <!-- /Account Item content -->
+                    </div>
+                    <a class="close-reveal-modal close-icon" ng-click="closeCategoryModal(card)"><i class="icon-delete-fl-5"></i></a>
+                </div>
+                <div id="modal-bg" class="modal-bg reveal-modal-bg vanish modal-on" ng-show="card.modalOn" style="cursor: pointer; height: 100%; width: 100%; display:block; outline:none" tabindex="0" esc-action="escPressed(card)" ng-cloak></div>
+                <!-- /MODAL CATEGORY DETAIL -->
+            </div>
+        </div>
+
+        <div id="modal-bg-tutorial" class="reveal-modal-bg vanish" style="cursor: pointer; height: 100%; width: 100%; display:block;"></div>
+        <!-- MODAL TUTORIAL -->
+        <div id="modal-tutorial" class="reveal-modal modal-window " style="opacity: 1; top: 60px;">
+            <div id="tutorial01" class="tutorial-slide">
+                <div class="image">
+                    <img src="@this.Localize("TutorialImg1.img")">
+                </div>
+                <div class="dots">
+                    <span id="dot1" class="dot current"></span>
+                    <span id="dot2" class="dot" onclick="goToT02();"></span>
+                    <span id="dot3" class="dot"></span>
+                </div>
+                <h4>@this.Localize("TutorialTitle1.txt")</h4>
+                <p>@this.Localize("TutorialDescription1.txt")</p>
+                <div class="buttons">
+                    <a id="goto2" class="btn-primary" href="javascript:goToT02()">@this.Localize("Continue.txt")</a>
+                </div>
+            </div>
+            <div id = "tutorial02" class="tutorial-slide" style="display: none;">
+                <div class="image">
+                    <img src = "@this.Localize("TutorialImg2.img")">
+                </div>
+                <h4>@this.Localize("TutorialTitle2.txt")</h4>
+                <p>@this.Localize("TutorialDescription2.txt")</p>
+                <div class="dots">
+                    <span id = "dot1" class="dot" onclick="goToT01();"></span>
+                    <span id = "dot2" class="dot current"></span>
+                    <span id = "dot3" class="dot" onclick="goToT03();"></span>
+                </div>
+                <div class="buttons">
+                    <a id = "goto1" class="btn" href="javascript:goToT01()">@this.Localize("Back.txt")</a>
+                    <a id = "goto3" class="btn-primary" href="javascript:goToT03()">@this.Localize("Continue.txt")</a>
+                </div>
+            </div>
+            <div id = "tutorial03" class="tutorial-slide" style="display: none;">
+                <div class="image">
+                    <img src = "@this.Localize("TutorialImg2.img")">
+                </div>
+                <h4>@this.Localize("TutorialTitle3.txt")</h4>
+                <!-- <p>Choose from the quick actions to start receiving notifications with one click!</p> -->
+                <p>@this.Localize("TutorialDescription1-3.txt")</p>
+                <p>
+                    <!-- Click<strong>“Essentials”</strong> for our recommended list of notifications or<br/> -->
+                    @this.Localize("TutorialDescription2-3.txt")
+                </p>
+                <div class="dots">
+                    <span id = "dot1" class="dot" onclick="goToT01();"></span>
+                    <span id = "dot2" class="dot" onclick="goToT02();"></span>
+                    <span id = "dot3" class="dot current"></span>
+                </div>
+                <div class="buttons">
+                    <a id = "goto2" class="btn" href="javascript:goToT02()">@this.Localize("Back.txt")</a>
+                    <a id = "goto"  class="btn-primary close-reveal-modal" ng-click="dismissModal()">@this.Localize("Finish.txt")</a>
+                </div>
+            </div>
+        </div>
+        <!-- /MODAL TUTORIAL -->
+        <div id="modal-bg-tutorial" class="reveal-modal-bg modal-on vanish" ng-show="subscribeConfirmationModal" style="cursor: pointer; height: 100%; width: 100%; display:block;" ng-cloak></div>
+        
+        <!-- CONFIRMATION MODAL -->
+        <div id="modal-all" class="reveal-modal modal-window notify" ng-class="{'modal-on': subscribeConfirmationModal}" style="opacity: 1; top: 60px;">
+            
+            <p ng-show="subscribedToAllClicked">@this.Localize("SubscribeToAllConfirmation.txt")</p>
+            <p ng-show="saveChangesClicked">@this.Localize("SaveConfirmation.txt")</p>
+
+            <a ng-click="subscribeConfirmationModal = subscribedToAllClicked = saveChangesClicked = false" class="close-reveal-modal btn">@this.Localize("Cancel.txt")</a>
+            
+            <a id="Subscribe_To_All_Btn" ng-click="(subscribeAll())" ng-show="subscribedToAllClicked" class="close-reveal-modal btn-primary on-block " style="margin-left: 20px;">@this.Localize("Subscribe.txt")</a>
+            <a id="Save_Changes_Btn" ng-click="(saveChanges())" ng-show="saveChangesClicked" class="close-reveal-modal btn-primary on-block " style="margin-left: 20px;">@this.Localize("SaveChanges.txt")</a>
+
+        </div>
+        <!-- /CONFIRMATION MODAL -->
+        
+    </div>
+
+</div>
+
+<script src = "https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular.min.js" ></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular-route.js"></script>
+<script src = "https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular-sanitize.min.js"></script>
+@*Angular animate*@
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular-animate.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
+<script src="~/Notifications/Scripts/Notifications/angular-subscriptions/directives/angular-esc-action.js"></script>
+
+<script src="@BundleTable.Bundles.ResolveBundleUrl(BundleConfig.SubscriptionsBundle.ToBundlePath())"></script>

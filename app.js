@@ -13,6 +13,10 @@
                 templateUrl: "includes/user.html",
                 controller: "UserController"
             })
+            .when("/repo/:username/:reponame",{
+                templateUrl: "includes/repo.html",
+                controller: "RepoController"
+            })
             .otherwise({
                 redirectTo: "/main"
             });

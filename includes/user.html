@@ -1,5 +1,5 @@
   
-<div  id="userDetails">
+<div>
   <a href="#/main">Back to Search</a>
   
   <p>First Name: {{ user.login }}</p>
@@ -27,7 +27,7 @@ Order:
   </thead>
   <tbody>
     <tr ng-repeat="repo in repos | orderBy:orderRepo">
-      <td>{{repo.name}}</td>
+      <td ng-click="repoView(repo);">{{repo.name}}</td>
       <td>{{repo.stargazers_count | number}}</td>
       <td>{{repo.language}}</td>
     </tr>
